@@ -166,15 +166,22 @@ add_executable(${EXECUTABLE} ${PROJECT_SOURCES} ${IMGUI_SOURCES} ${IMPLOT_SOURCE
 
 set(GIT_VERSION_HPP ${CMAKE_CURRENT_SOURCE_DIR}/src/gitversion.hpp)
 
-# Add a custom command to generate gitversion.hpp
-add_custom_command(
-    OUTPUT ${GIT_VERSION_HPP}
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR} python3 ${CMAKE_CURRENT_SOURCE_DIR}/launch/addGitVersion.py
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD
-    COMMENT "Generating ${GIT_VERSION_HPP}..."
-    VERBATIM
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD")
+    # Add a custom command to generate gitversion.hpp
+    add_custom_command(
+        OUTPUT ${GIT_VERSION_HPP}
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR} python3 ${CMAKE_CURRENT_SOURCE_DIR}/launch/addGitVersion.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD
+        COMMENT "Generating ${GIT_VERSION_HPP}..."
+        VERBATIM
+    )
+else()
+    file(
+        GENERATE OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/.git/HEAD"
+        CONTENTS "static constexpr const char* GIT_HASH = \"Release\";"
+    )
+endif()
 
 add_custom_target(addGitVersion ALL DEPENDS ${GIT_VERSION_HPP})
 add_dependencies(${EXECUTABLE} addGitVersion)
