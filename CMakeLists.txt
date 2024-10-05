@@ -55,6 +55,28 @@ endif()
 set(JLINK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/jlink/inc/)
 
 if(UNIX)
+
+    set(INSTALL_BASE ${CMAKE_INSTALL_PREFIX})
+    message(STATUS "INSTALL_BASE: ${INSTALL_BASE}")
+
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE "STRING" "Install prefix" FORCE)
+        set(INSTALL_PATH ${INSTALL_BASE}/MCUViewer)
+        set(BIN_INSTALL_PATH ${INSTALL_BASE}/MCUViewer)
+        set(LIB_INSTALL_PATH ${INSTALL_BASE}/lib)
+        set(DAT_INSTALL_PATH ${INSTALL_BASE}/MCUViewer)
+    else()
+        set(INSTALL_PATH ${INSTALL_BASE})
+        set(BIN_INSTALL_PATH ${INSTALL_BASE}/bin)
+        set(LIB_INSTALL_PATH ${INSTALL_BASE}/lib)
+        set(DAT_INSTALL_PATH ${INSTALL_BASE}/share/MCUViewer)
+    endif()
+
+    message(STATUS "INSTALL_PATH: ${INSTALL_PATH}")
+    message(STATUS "BIN_INSTALL_PATH: ${BIN_INSTALL_PATH}")
+    message(STATUS "LIB_INSTALL_PATH: ${LIB_INSTALL_PATH}")
+    message(STATUS "DAT_INSTALL_PATH: ${DAT_INSTALL_PATH}")
+
     include(FetchContent)
     FetchContent_Declare(
         spdlog
@@ -78,8 +100,6 @@ if(UNIX)
     find_package(glfw3 REQUIRED)
     set(STLINK_LINUX ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stlink/lib/linux/libstlink.a)
     set(JLINK_LINUX ${CMAKE_CURRENT_SOURCE_DIR}/third_party/jlink/lib/linux/libjlinkarm.so.7)
-    set(INSTALL_PATH /usr/local/MCUViewer)
-    set(LIB_INSTALL_PATH /usr/local/lib)
     set(DESKTOP_FILE_PATH /usr/share/applications)
 
     set(LIB_CONF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/launch/install/Unix/MCUViewer.conf)
@@ -253,9 +273,9 @@ add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini
     ${CMAKE_BINARY_DIR}/imgui.ini)
 
-install(TARGETS ${EXECUTABLE} RUNTIME DESTINATION ${INSTALL_PATH} COMPONENT applications)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini DESTINATION ${INSTALL_PATH})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stlink/chips DESTINATION ${INSTALL_PATH})
+install(TARGETS ${EXECUTABLE} RUNTIME DESTINATION ${BIN_INSTALL_PATH} COMPONENT applications)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini DESTINATION ${DAT_INSTALL_PATH})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stlink/chips DESTINATION ${DAT_INSTALL_PATH})
 
 if(WIN32)
     if(PRODUCTION)
@@ -273,7 +293,7 @@ if(WIN32)
 endif()
 
 if(UNIX)
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/launch/install/Unix/icon.png DESTINATION ${INSTALL_PATH})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/launch/install/Unix/icon.png DESTINATION ${DAT_INSTALL_PATH})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/launch/install/Unix/MCUViewer.desktop
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${DESKTOP_FILE_PATH})
